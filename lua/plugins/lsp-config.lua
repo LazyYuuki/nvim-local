@@ -20,6 +20,7 @@ return {
           "html",
           "jsonls",        -- json
           "lua_ls",        -- lua
+          "mdx_analyzer",  -- mdx
           "marksman",      -- markdown
           -- "ocamllsp",      -- ocaml
           "ruff",          -- python linter and formatter
@@ -69,6 +70,7 @@ return {
           end,
           settings = { Lua = {} },
         },
+        mdx_analyzer = { capabilities = capabilities },
         marksman = { capabilities = capabilities },
         ruff = {
           capabilities = capabilities,
