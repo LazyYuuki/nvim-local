@@ -38,176 +38,77 @@ return {
   {
     "neovim/nvim-lspconfig",
     config = function()
-      local lsp = require("lspconfig")
       local util = require("lspconfig.util")
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      -- bash lsp
-      lsp.bashls.setup({
-        capabilities = capabilities,
-      })
-
-      -- javascript lsp
-      lsp.ts_ls.setup({
-        capabilities = capabilities,
-      })
-
-      lsp.biome.setup({
-        capabilities = capabilities,
-        root_dir = util.root_pattern("~/biome.json"),
-      })
-
-      -- clang lsp
-      lsp.clangd.setup({
-        capabilities = capabilities,
-        init_options = {
-          -- Check here for reason
-          -- https://github.com/clangd/coc-clangd/issues/20
-          fallbackFlags = { "-std=c++17" },
-        },
-      })
-
-      -- css lsp
-      lsp.cssls.setup({
-        capabilities = capabilities,
-      })
-
-      -- tailwind lsp
-      lsp.tailwindcss.setup({
-        capabilities = capabilities,
-      })
-
-      -- docker lsp
-      lsp.dockerls.setup({
-        capabilities = capabilities,
-      })
-
-      -- go lsp
-      lsp.gopls.setup({
-        capabilities = capabilities,
-      })
-
-      -- html lsp
-      lsp.html.setup({
-        capabilities = capabilities,
-      })
-
-      -- json lsp
-      lsp.jsonls.setup({
-        capabilities = capabilities,
-      })
-
-      -- lua lsp
-      lsp.lua_ls.setup({
-        capabilities = capabilities,
-        on_init = function(client)
-          local path = client.workspace_folders[1].name
-          if
-              vim.loop.fs_stat(path .. "/.luarc.json") or vim.loop.fs_stat(path .. "/.luarc.jsonc")
-          then
-            return
-          end
-
-          client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
-            runtime = {
-              version = "LuaJIT",
-            },
-            workspace = {
-              checkThirdParty = false,
-              library = {
-                vim.env.VIMRUNTIME,
+      local servers = {
+        bashls = { capabilities = capabilities },
+        ts_ls = { capabilities = capabilities },
+        biome = { capabilities = capabilities, root_dir = util.root_pattern("~/biome.json") },
+        clangd = { capabilities = capabilities, init_options = { fallbackFlags = { "-std=c++17" } } },
+        cssls = { capabilities = capabilities },
+        tailwindcss = { capabilities = capabilities },
+        dockerls = { capabilities = capabilities },
+        gopls = { capabilities = capabilities },
+        html = { capabilities = capabilities },
+        jsonls = { capabilities = capabilities },
+        lua_ls = {
+          capabilities = capabilities,
+          on_init = function(client)
+            local path = client.workspace_folders[1].name
+            if vim.loop.fs_stat(path .. "/.luarc.json") or vim.loop.fs_stat(path .. "/.luarc.jsonc") then
+              return
+            end
+            client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
+              runtime = { version = "LuaJIT" },
+              workspace = {
+                checkThirdParty = false,
+                library = { vim.env.VIMRUNTIME },
               },
-            },
-          })
-        end,
-        settings = {
-          Lua = {},
+            })
+          end,
+          settings = { Lua = {} },
         },
-      })
-
-      -- markdown lsp
-      lsp.marksman.setup({
-        capabilities = capabilities,
-      })
-
-      -- ocaml lsp
-      -- lsp.ocamllsp.setup({
-      --   capabilities = capabilities,
-      -- })
-
-      -- python lsp
-      -- this is for linting and formatting
-      lsp.ruff.setup({
-        capabilities = capabilities,
-        init_options = {
+        marksman = { capabilities = capabilities },
+        ruff = {
+          capabilities = capabilities,
+          init_options = {
+            settings = {
+              configurationPreference = "filesystemFirst",
+              fixAll = false,
+            },
+          },
+        },
+        pyright = {
+          capabilities = capabilities,
           settings = {
-            configurationPreference = "filesystemFirst",
-            fixAll = false,
+            pyright = { disableOrganizeImports = true },
+            python = { analysis = { ignore = { "*" } } },
           },
         },
-      })
-
-      -- this is for autocompletion
-      lsp.pyright.setup({
-        capabilities = capabilities,
-        settings = {
-          pyright = {
-            disableOrganizeImports = true,
-          },
-          python = {
-            analysis = {
-              ignore = { "*" },
-            },
-          },
+        rust_analyzer = {
+          settings = { ["rust-analyzer"] = { diagnostics = { enable = true } } },
+          capabilities = capabilities,
         },
-      })
+        sqls = { capabilities = capabilities },
+        svelte = { capabilities = capabilities },
+        taplo = { capabilities = capabilities },
+        yamlls = { capabilities = capabilities },
+        zls = { capabilities = capabilities },
+      }
 
-      -- rust lsp
-      lsp.rust_analyzer.setup({
-        settings = {
-          ["rust-analyzer"] = {
-            diagnostics = {
-              enable = true,
-            },
-          },
-        },
-        capabilities = capabilities,
-      })
+      -- Register + Enable them all
+      for name, config in pairs(servers) do
+        vim.lsp.config(name, config)
+        vim.lsp.enable(name)
+      end
 
-      -- sql lsp
-      lsp.sqls.setup({
-        capabilities = capabilities,
-      })
 
-      -- svelte lsp
-      lsp.svelte.setup({
-        capabilities = capabilities,
-      })
-
-      -- toml lsp
-      lsp.taplo.setup({
-        capabilities = capabilities,
-      })
-
-      -- yaml lsp
-      lsp.yamlls.setup({
-        capabilities = capabilities,
-      })
-
-      -- zig lsp
-      lsp.zls.setup({
-        capabilities = capabilities,
-      })
-
-      -- Keymap setup
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("UserLspConfig", {}),
         callback = function(ev)
-          -- Enable completion triggered by <c-x><c-o>
           vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
 
-          -- Buffer local mappings.
-          -- See `:help vim.lsp.*` for documentation on any of the below functions
           local opts = { buffer = ev.buf }
           vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
           vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
