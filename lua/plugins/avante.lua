@@ -11,45 +11,29 @@ return {
   ---@type avante.Config
   opts = {
     instructions_file = "avante.md",
-    provider = "claude",
+    provider = "gpt5",
     providers = {
-      claude = {
-        endpoint = "https://api.anthropic.com",
-        model = "claude-sonnet-4-20250514",
-        timeout = 30000, -- Timeout in milliseconds
-        extra_request_body = {
-          temperature = 0.25,
-          max_tokens = 20480,
-        },
-      },
-      gpt5 = {
+      openai = {
         endpoint = "https://api.openai.com/v1",
         model = "gpt-5",
         timeout = 30000, -- Timeout in milliseconds
-        extra_request_body = {
-          temperature = 0.25,
-          max_tokens = 20480,
-        },
       },
       gpt5mini = {
+        __inherited_from = "openai",
         endpoint = "https://api.openai.com/v1",
         model = "gpt-5-mini",
         timeout = 30000, -- Timeout in milliseconds
-        extra_request_body = {
-          temperature = 0.25,
-          max_tokens = 20480,
-        },
       },
       gpt5nano = {
+        __inherited_from = "openai",
         endpoint = "https://api.openai.com/v1",
         model = "gpt-5-nano",
         timeout = 30000, -- Timeout in milliseconds
-        extra_request_body = {
-          temperature = 0.25,
-          max_tokens = 20480,
-        },
       }
     },
+  },
+  behaviour = {
+    auto_apply_diff_after_generation = false,
   },
   dependencies = {
     "nvim-lua/plenary.nvim",
